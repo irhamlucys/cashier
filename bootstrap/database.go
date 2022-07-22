@@ -71,5 +71,6 @@ func InitMongoDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 
+	fmt.Println(fmt.Sprintf("connected to mongo from %s:%s", dbHost, dbPort))
 	return client
 }

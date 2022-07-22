@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"log"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -29,4 +31,7 @@ func main() {
 	menuCategoryRepo := _menuCategoryRepo.NewMongoRepository(*mongoDatabase)
 	menuCategoryUsecase := _menuCategoryUsecase.NewMenuCategoryUsecase(menuCategoryRepo, timeoutContext)
 	_menuCategoryHttp.NewMenuCategoryHandler(router, menuCategoryUsecase)
+
+	appPort := fmt.Sprintf(":%v", bootstrap.App.Config.GetString("server.address"))
+	log.Fatal(router.Run(appPort))
 }
