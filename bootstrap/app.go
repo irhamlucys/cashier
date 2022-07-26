@@ -24,6 +24,6 @@ func init() {
 func AppInit() {
 	App = &Application{}
 	App.Config = InitConfig()
-	// App.Maria = InitMariaDatabase()
+	App.Maria = InitMariaDatabase()
 	App.Mongo = InitMongoDatabase()
 }

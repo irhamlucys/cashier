@@ -8,6 +8,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/fatih/color"
+	_ "github.com/go-sql-driver/mysql"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
@@ -28,6 +30,11 @@ func InitMariaDatabase() *sql.DB {
 
 	dbConn, err := sql.Open(`mysql`, dsn)
 
+	dbConn.SetMaxIdleConns(10)
+	dbConn.SetMaxOpenConns(100)
+	dbConn.SetConnMaxIdleTime(5 * time.Minute)
+	dbConn.SetConnMaxLifetime(1 * time.Hour)
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,6 +44,7 @@ func InitMariaDatabase() *sql.DB {
 		log.Fatal(err)
 	}
 
+	color.Green(fmt.Sprintf("connected to MariaDB from %s:%s", dbHost, dbPort))
 	return dbConn
 }
 
@@ -71,6 +79,6 @@ func InitMongoDatabase() *mongo.Client {
 		log.Fatal(err)
 	}
 
-	fmt.Println(fmt.Sprintf("connected to mongo from %s:%s", dbHost, dbPort))
+	color.Green(fmt.Sprintf("connected to Mongo from %s:%s", dbHost, dbPort))
 	return client
 }

@@ -4,9 +4,10 @@ import (
 	"context"
 	"net/http"
 
+	"lucy/cashier/domain"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
-	"github.com/irhamlucys/cashier/domain"
 )
 
 type ResponseError struct {
@@ -15,15 +16,6 @@ type ResponseError struct {
 
 type MenuCategoryHandler struct {
 	MenuCategoryUsecase domain.MenuCategoryUsecase
-}
-
-func isRequestValid(mc *domain.MenuCategory) (bool, error) {
-	validate := validator.New()
-	err := validate.Struct(mc)
-	if err != nil {
-		return false, err
-	}
-	return true, nil
 }
 
 func NewMenuCategoryHandler(router *gin.Engine, mc domain.MenuCategoryUsecase) {
@@ -60,4 +52,13 @@ func (mch *MenuCategoryHandler) InsertOne(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, result)
+}
+
+func isRequestValid(mc *domain.MenuCategory) (bool, error) {
+	validate := validator.New()
+	err := validate.Struct(mc)
+	if err != nil {
+		return false, err
+	}
+	return true, nil
 }

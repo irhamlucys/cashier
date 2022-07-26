@@ -3,7 +3,8 @@ package mongo
 import (
 	"context"
 
-	"github.com/irhamlucys/cashier/domain"
+	"lucy/cashier/domain"
+
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

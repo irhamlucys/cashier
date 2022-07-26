@@ -4,8 +4,9 @@ import (
 	"context"
 	"time"
 
+	"lucy/cashier/domain"
+
 	"github.com/google/uuid"
-	"github.com/irhamlucys/cashier/domain"
 )
 
 type menuCategoryUsecase struct {

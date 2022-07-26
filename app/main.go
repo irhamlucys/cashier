@@ -8,19 +8,19 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
-	"github.com/irhamlucys/cashier/bootstrap"
-	_menuCategoryHttp "github.com/irhamlucys/cashier/menu_category/delivery/http"
-	_menuCategoryRepo "github.com/irhamlucys/cashier/menu_category/repository/mongo"
-	_menuCategoryUsecase "github.com/irhamlucys/cashier/menu_category/usecase"
+	"lucy/cashier/bootstrap"
+	_menuCategoryHttp "lucy/cashier/menu_category/delivery/http"
+	_menuCategoryRepo "lucy/cashier/menu_category/repository/mongo"
+	_menuCategoryUsecase "lucy/cashier/menu_category/usecase"
 )
 
 func main() {
-	// defer func() {
-	// 	err := bootstrap.App.Maria.Close()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
+	defer func() {
+		err := bootstrap.App.Maria.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
 
 	router := gin.Default()
 	router.Use(cors.Default())
