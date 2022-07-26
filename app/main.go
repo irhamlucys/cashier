@@ -28,9 +28,10 @@ func main() {
 	timeoutContext := time.Duration(bootstrap.App.Config.GetInt("context.timeout")) * time.Second
 	mongoDatabase := bootstrap.App.Mongo.Database(bootstrap.App.Config.GetString("mongo.name"))
 
-	menuCategoryRepo := _menuCategoryRepo.NewMongoRepository(*mongoDatabase)
+	menuCategoryRepo := _menuCategoryRepo.NewMenuCategoryMongoRepository(*mongoDatabase)
 	menuCategoryUsecase := _menuCategoryUsecase.NewMenuCategoryUsecase(menuCategoryRepo, timeoutContext)
 	_menuCategoryHttp.NewMenuCategoryHandler(router, menuCategoryUsecase)
+
 
 	appPort := fmt.Sprintf(":%v", bootstrap.App.Config.GetString("server.address"))
 	log.Fatal(router.Run(appPort))

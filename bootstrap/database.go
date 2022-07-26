@@ -36,11 +36,13 @@ func InitMariaDatabase() *sql.DB {
 	dbConn.SetConnMaxLifetime(1 * time.Hour)
 
 	if err != nil {
+		color.Red(err.Error())
 		log.Fatal(err)
 	}
 
 	err = dbConn.Ping()
 	if err != nil {
+		color.Red(err.Error())
 		log.Fatal(err)
 	}
 
@@ -71,14 +73,16 @@ func InitMongoDatabase() *mongo.Client {
 
 	err = client.Connect(ctx)
 	if err != nil {
+		color.Red(err.Error())
 		log.Fatal(err)
 	}
 
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
+		color.Red(err.Error())
 		log.Fatal(err)
 	}
 
-	color.Green(fmt.Sprintf("connected to Mongo from %s:%s", dbHost, dbPort))
+	color.Green(fmt.Sprintf("connected to MongoDB from %s:%s", dbHost, dbPort))
 	return client
 }

@@ -15,48 +15,60 @@ type ResponseError struct {
 }
 
 type MenuCategoryHandler struct {
-	MenuCategoryUsecase domain.MenuCategoryUsecase
+	MenuCategoryUsecase domain.MenuCategoryUsecaseContract
 }
 
-func NewMenuCategoryHandler(router *gin.Engine, mc domain.MenuCategoryUsecase) {
+func NewMenuCategoryHandler(router *gin.Engine, usecase domain.MenuCategoryUsecaseContract) {
 	handler := &MenuCategoryHandler{
-		MenuCategoryUsecase: mc,
+		MenuCategoryUsecase: usecase,
 	}
 
-	router.POST("/menu-categories", handler.InsertOne)
+	router.POST("/menu-categories", handler.CreateMenuCategory)
+	router.GET("/menu-categories/:id", handler.FindMenuCategory)
 }
 
-func (mch *MenuCategoryHandler) InsertOne(c *gin.Context) {
-	var (
-		menucategory domain.MenuCategory
-		err error
-	)
+func (handler *MenuCategoryHandler) CreateMenuCategory(c *gin.Context) {
+	var request domain.MenuCategory
+	var	err error
 
-	err = c.BindJSON(&menucategory)
+	err = c.BindJSON(&request)
 	if err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
 
 	var ok bool
-	if ok, err = isRequestValid(&menucategory); !ok {
+	if ok, err = isRequestValid(&request); !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	ctx := context.Background()
-
-	result, err := mch.MenuCategoryUsecase.InsertOne(ctx, &menucategory)
+	result, err, httpCode := handler.MenuCategoryUsecase.CreateMenuCategory(ctx, &request)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(httpCode, gin.H{"error": err.Error()})
+		return
 	}
 
-	c.JSON(http.StatusOK, result)
+	c.JSON(httpCode, result)
 }
 
-func isRequestValid(mc *domain.MenuCategory) (bool, error) {
+func (handler *MenuCategoryHandler) FindMenuCategory(c *gin.Context) {
+	id := c.Param("id")
+
+	ctx := context.Background()
+	result, err, httpCode := handler.MenuCategoryUsecase.FindMenuCategory(ctx, id)
+	if err != nil {
+		c.JSON(httpCode, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(httpCode, result)
+}
+
+func isRequestValid(request *domain.MenuCategory) (bool, error) {
 	validate := validator.New()
-	err := validate.Struct(mc)
+	err := validate.Struct(request)
 	if err != nil {
 		return false, err
 	}

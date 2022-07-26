@@ -2,57 +2,53 @@ package mongo
 
 import (
 	"context"
+	"strconv"
 
 	"lucy/cashier/domain"
 
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+const timeFormat     = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
 
-type mongoRepository struct {
+type menuCategoryMongoRepository struct {
 	DB         mongo.Database
 	Collection mongo.Collection
 }
 
-const (
-	timeFormat     = "2006-01-02T15:04:05.999Z07:00" // reduce precision from RFC3339Nano as date format
-	collectionName = "menu_categories"
-)
-
-func NewMongoRepository(DB mongo.Database) domain.MenuCategoryRepository {
-	return &mongoRepository{
-			DB,
-			*DB.Collection(collectionName),
+func NewMenuCategoryMongoRepository(DB mongo.Database) domain.MenuCategoryRepositoryContract {
+	return &menuCategoryMongoRepository{
+			DB: DB,
+			Collection: *DB.Collection("menu_categories"),
 		}
 }
 
-func (m *mongoRepository) InsertOne(ctx context.Context, menucategory *domain.MenuCategory) (*domain.MenuCategory, error) {
-	var (
-		err error
-	)
+func (repo *menuCategoryMongoRepository) InsertOne(ctx context.Context, data *domain.MenuCategory) (*domain.MenuCategory, error) {
+	var err error
 
-	_, err = m.Collection.InsertOne(ctx, menucategory)
+	_, err = repo.Collection.InsertOne(ctx, data)
 	if err != nil {
-		return menucategory, err
+		return data, err
 	}
 
-	return menucategory, nil
+	return data, nil
 }
 
-func (m *mongoRepository) FindOne(ctx context.Context, id string) (*domain.MenuCategory, error) {
-	var (
-		menucategory domain.MenuCategory
-		err  error
-	)
+func (repo *menuCategoryMongoRepository) FindOne(ctx context.Context, id string) (*domain.MenuCategory, error) {
+	var menucategory domain.MenuCategory
+	var err  error
 
-	idHex, err := primitive.ObjectIDFromHex(id)
-	if err != nil {
-		return &menucategory, err
-	}
+	intID, _ := strconv.Atoi(id)
 
-	err = m.Collection.FindOne(ctx, bson.M{"_id": idHex}).Decode(&menucategory)
+	err = repo.Collection.FindOne(ctx, bson.M{
+								"$or":
+									bson.A{
+										bson.M{"uuid": id},
+										bson.M{"id": intID},
+									},
+							},).
+							Decode(&menucategory)
 	if err != nil {
 		return &menucategory, err
 	}

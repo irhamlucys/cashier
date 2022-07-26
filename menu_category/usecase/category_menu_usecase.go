@@ -2,50 +2,49 @@ package usecase
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"lucy/cashier/domain"
-
-	"github.com/google/uuid"
+	"lucy/cashier/lib"
 )
 
 type menuCategoryUsecase struct {
-	menuCategoryRepo	domain.MenuCategoryRepository
+	menuCategoryRepo	domain.MenuCategoryRepositoryContract
 	contextTimeout		time.Duration
 }
 
-func NewMenuCategoryUsecase(mc domain.MenuCategoryRepository, to time.Duration) domain.MenuCategoryUsecase {
+func NewMenuCategoryUsecase(repo domain.MenuCategoryRepositoryContract, timeout time.Duration) domain.MenuCategoryUsecaseContract {
 	return &menuCategoryUsecase{
-		menuCategoryRepo: mc,
-		contextTimeout: to,
+		menuCategoryRepo: repo,
+		contextTimeout: timeout,
 	}
 }
 
-func (menuCategory *menuCategoryUsecase) InsertOne(c context.Context, mc *domain.MenuCategory) (*domain.MenuCategory, error) {
-
-	ctx, cancel := context.WithTimeout(c, menuCategory.contextTimeout)
+func (usecase *menuCategoryUsecase) CreateMenuCategory(c context.Context, data *domain.MenuCategory) (*domain.MenuCategory, error, int) {
+	ctx, cancel := context.WithTimeout(c, usecase.contextTimeout)
 	defer cancel()
 
-	mc.UUID = uuid.New()
-	mc.CreatedAt = time.Now()
-
-	res, err := menuCategory.menuCategoryRepo.InsertOne(ctx, mc)
-	if err != nil {
-		return res, err
+	if ok, err := lib.ValidatorUUID(data.UUID); !ok {
+		return nil, err, http.StatusBadRequest
 	}
 
-	return res, nil
+	res, err := usecase.menuCategoryRepo.InsertOne(ctx, data)
+	if err != nil {
+		return res, err, http.StatusInternalServerError
+	}
+
+	return res, nil, http.StatusCreated
 }
 
-func (menuCategory *menuCategoryUsecase) FindOne(c context.Context, id string) (*domain.MenuCategory, error) {
-
-	ctx, cancel := context.WithTimeout(c, menuCategory.contextTimeout)
+func (usecase *menuCategoryUsecase) FindMenuCategory(c context.Context, id string) (*domain.MenuCategory, error, int) {
+	ctx, cancel := context.WithTimeout(c, usecase.contextTimeout)
 	defer cancel()
 
-	res, err := menuCategory.menuCategoryRepo.FindOne(ctx, id)
+	res, err := usecase.menuCategoryRepo.FindOne(ctx, id)
 	if err != nil {
-		return res, err
+		return res, err, http.StatusInternalServerError
 	}
 
-	return res, nil
+	return res, nil, http.StatusOK
 }
